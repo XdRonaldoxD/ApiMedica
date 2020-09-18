@@ -6,6 +6,7 @@ use App\User;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Session;
 // use Barryvdh\DomPDF\Facade as PDF;
 use Goutte\Client;
 class UsarioController extends Controller
@@ -166,10 +167,19 @@ class UsarioController extends Controller
         return response()->json($signup);
     }
 
-    // public function RenuevaToken(Request $request){
-    //     $jwtAuth=new \JwtAuth;
-    //     $jwtAuth->checktoken();
-    // }
+    public function EliminarSesion(Request $request){
+        $json = $request->input('json', null);
+        $params = json_decode($json, true);
+        $usuario = User::where('id',$params)->first();
+        if (Session::getHandler()->destroy($usuario->session_id)) {
+          $usuario->session_id = null;
+          $usuario->save();
+          return json_encode('Sesion destruida con exito');               
+        }
+    }
+    
+
+
 
     public function ListaUsuario()
     {

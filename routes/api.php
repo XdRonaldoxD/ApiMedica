@@ -22,6 +22,7 @@ use Illuminate\Http\Request;
 
 Route::post('login','UsarioController@login');
 
+
 Route::get('pdf','UsarioController@PruebapDF');
 
 Route::post('registrado','UsarioController@register');
@@ -34,12 +35,15 @@ Route::post('login/Paciente/perfil/update','HistoriaClinicaController@UploadPerf
 Route::post('login/Paciente/pdf/update','HistoriaClinicaController@DocumentoLaboratorio');
 Route::get('login/perfil/{filename}','HistoriaClinicaController@getImagen');
 
+
 Route::get('Indicaciones/Doctor/Exportar/{id}', 'IndicacionesDocController@ExportarPdf');
 
 Route::get('Paciente/Reporte/{id?}','HistoriaClinicaController@MostrarPacientePDF');
 
 Route::get('Paciente/Reporte/HistoriaClinica/{id?}','DocumentoLaboratorioController@MostrarTodoPDF');
 Route::get('Paciente/Reporte/Documento/{file_name}','DocumentoLaboratorioController@obtenerPDF');
+
+Route::post('EliminarSession','UsarioController@EliminarSesion');
 Route::middleware('api.auth', 'throttle:60,1')->group(function () {
 //MEDICOS-USUARIOS
     // Route::post('login/usuarion/update','UsarioController@updateUser');
@@ -51,6 +55,7 @@ Route::middleware('api.auth', 'throttle:60,1')->group(function () {
     Route::get('usuarios/listado','UsarioController@ListaUsuario');
     Route::post('Deshabilitar','UsarioController@DeshabilitarUsuario');
     Route::get('GetDoctorId/{id}','UsarioController@TraerDatosDoctor');
+ 
 
     //Paciente Historia Clinica
     Route::get('PacienteHistoria/listado','HistoriaClinicaController@ListaHistoriaPaciente');
