@@ -29,8 +29,6 @@ class JwtAuth
                 'id_usuario' => $user['id'],
             );
         }
-
-
         $signup = false;
         if ($user) {
             $signup = true;
@@ -58,14 +56,14 @@ class JwtAuth
             $decode = JWT::decode($jwt, $this->key, array('HS256'));
 
             if (is_null($getToken)) {
-                //INICIO VERIFICACION DATOS EN SESION
-                $new_sessid   = Session::getId();
-                $last_session = Session::getHandler()->read($user['session_id']);
-                $user->session_id = $new_sessid;
-                $user->save();
+            
                 return $jwt;
             } else {
-                
+                    //INICIO VERIFICACION DATOS EN SESION
+                    $new_sessid   = Session::getId();
+                    $last_session = Session::getHandler()->read($user['session_id']);
+                    $user->session_id = $new_sessid;
+                    $user->save();
 
                 return $decode;
             }

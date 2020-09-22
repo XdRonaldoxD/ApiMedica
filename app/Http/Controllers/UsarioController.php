@@ -179,7 +179,16 @@ class UsarioController extends Controller
     }
     
 
-
+    public function ConsultaUsuario(Request $request){
+        $json = $request->input('json', null);
+        $params = json_decode($json, true);
+        $usuario = User::where('id',$params)->first()->toArray();
+        $repuesta=false;
+        if (empty($usuario['session_id'])) {
+            $repuesta=true;
+        }
+        return response()->json($repuesta);
+    }
 
     public function ListaUsuario()
     {

@@ -54,6 +54,7 @@ Route::middleware('api.auth', 'throttle:60,1')->group(function () {
     Route::post('DniExistente','UsarioController@DNIExistente');
     Route::get('usuarios/listado','UsarioController@ListaUsuario');
     Route::post('Deshabilitar','UsarioController@DeshabilitarUsuario');
+    Route::post('ConsultarUsuario','UsarioController@ConsultaUsuario');
     Route::get('GetDoctorId/{id}','UsarioController@TraerDatosDoctor');
  
 
