@@ -46,9 +46,6 @@ class JwtAuth
                 //despues de una semana
                 'expiracion' => time() + (1 * 24 * 60 * 60)
             );
-            // dd($new_sessid);
-          
-
 
             //el HS256 es para cifrar la llave
             $jwt = JWT::encode($token, $this->key, 'HS256');
@@ -60,10 +57,28 @@ class JwtAuth
                 return $jwt;
             } else {
                     //INICIO VERIFICACION DATOS EN SESION
-                    $new_sessid   = Session::getId();
-                    $last_session = Session::getHandler()->read($user['session_id']);
+                    $new_sessid   = JwtAuth::generarCodigo(12);
                     $user->session_id = $new_sessid;
                     $user->save();
+
+                    $user2 = User::where(array(
+                        'email' => $email,
+                        'password' => $contra,
+                        'vigencia_users' => 1
+                    ))->first();
+
+                    $decode = array(
+                        'sub' => $user2->id,
+                        'email' => $user2->email,
+                        'nombre' => $user2->nombre,
+                        'apellido' => $user2->apellido,
+                        'tipo_usuario' => $user2->role,
+                        'session_id'=>$user2->session_id,
+                        //creacion del dato es el iat create_at
+                        'iat' => time(),
+                        //despues de una semana
+                        'expiracion' => time() + (1 * 24 * 60 * 60)
+                    );
 
                 return $decode;
             }
@@ -72,6 +87,14 @@ class JwtAuth
             return array('status' => 'error', 'message' => 'Login a Fallado');
         }
     }
+
+   static function generarCodigo($longitud) {
+        $key = '';
+        $pattern = '1234567890abcdefghijklmnopqrstuvwxyz';
+        $max = strlen($pattern)-1;
+        for($i=0;$i < $longitud;$i++) $key .= $pattern{mt_rand(0,$max)};
+        return $key;
+       }
 
     //metodo para decodoficar el toke e usar en los controladores
     //recoger el toker y ver si es correcto o no

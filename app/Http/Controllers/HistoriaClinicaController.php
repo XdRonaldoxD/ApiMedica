@@ -282,7 +282,7 @@ class HistoriaClinicaController extends Controller
             $tratamiento = null;
         }
         $DocHclinica[0]['Tratamiento'] = $tratamiento;
-        $imagen=base64_encode(file_get_contents("img/sangeronimo.jpg"));
+        $imagen=base64_encode(file_get_contents("https://www.sangeronimohistoriaclinica.com/apiMedico/public/img/sangeronimo.jpg"));
         // dd($imagen);
         $pdf = \PDF::loadView('pdf.historiaClinica', ['historiaM' => $DocHclinica,"imagen"=>$imagen]);
         return $pdf->stream();

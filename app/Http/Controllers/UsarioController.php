@@ -181,10 +181,12 @@ class UsarioController extends Controller
 
     public function ConsultaUsuario(Request $request){
         $json = $request->input('json', null);
-        $params = json_decode($json, true);
-        $usuario = User::where('id',$params)->first()->toArray();
+        $params = explode("/",$json);
+        $usuario = User::where('id',$params[0])
+        ->where("session_id",str_replace('"','',$params[1]))
+        ->first();
         $repuesta=false;
-        if (empty($usuario['session_id'])) {
+        if (empty($usuario)) {
             $repuesta=true;
         }
         return response()->json($repuesta);

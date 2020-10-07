@@ -104,7 +104,7 @@ class DocumentoLaboratorioController extends Controller
                 }
                 $DocHclinica[$i]['Tratamiento'] = $tratamiento;
             }
-            $imagen=base64_encode(file_get_contents("img/sangeronimo.jpg"));
+            $imagen=base64_encode(file_get_contents("https://www.sangeronimohistoriaclinica.com/apiMedico/public/img/sangeronimo.jpg"));
 
            
             $pdf = \PDF::loadView('pdf.historiaClinica', ['historiaM' => $DocHclinica,"imagen"=>$imagen]);

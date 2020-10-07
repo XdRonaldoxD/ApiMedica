@@ -46,7 +46,7 @@ class IndicacionesDocController extends Controller
         ->where('id',$DatosDoc['usuario_id'])
         ->first()
         ->toArray();
-        $imagen=base64_encode(file_get_contents("img/sangeronimo.jpg"));
+        $imagen=base64_encode(file_get_contents("https://www.sangeronimohistoriaclinica.com/apiMedico/public/img/sangeronimo.jpg"));
         $pdf = \PDF::loadView('pdf.indicaciones', ['nombreDoctor' => $nombreDoctor,'IndiDoctor' => $IndicacionDoctor, 'Doctor' => $DatosDoc, 'Paciente' => $hclinicaPaciente,"imagen"=>$imagen]);
         
         return $pdf->stream();
