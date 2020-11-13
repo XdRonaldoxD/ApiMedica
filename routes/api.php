@@ -84,7 +84,8 @@ Route::middleware('api.auth', 'throttle:60,1')->group(function () {
     Route::post('Almacenar/Indicaciones','IndicacionesDocController@AlmacenarIndicacion');
 
 
-
+    //GRAFICO MEDICOS
+    Route::post('listado/Paciente','HistoriaClinicaController@InicioFechaAtendido');
 
 
 

@@ -170,7 +170,8 @@
         .table-striped tbody tr:nth-of-type(odd) {
             background-color: rgba(0, 0, 0, 0.05);
         }
-        .indicacion{
+
+        .indicacion {
             padding: 0px;
             margin: 0px;
 
@@ -182,58 +183,61 @@
     <div class="img">
         <img style="width: 100%;height: auto;position: absolute ;margin: 0px;" src="data:image/png;base64,{{$imagen}}" alt="">
     </div>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
     @foreach($historiaM as $hpaciente)
     <div class="content">
         <div class="title m-b-md">
             Historia Clinica:{{$hpaciente['nCitamed']}} <br>
         </div>
-        <p style="margin: 0 300px">Fecha Creación: {{$hpaciente['fecha_creacion']}}</p>
+        <p style="margin: 0 300px">Fecha Creación: {{date('d/m/Y',strtotime($hpaciente['fecha_creacion'])) }}</p>
     </div>
 
     <div class="links">
-        <strong >Nombre del Paciente : {{$hpaciente['nombre']}} {{$hpaciente['apellido']}} </strong> <strong>DNI: {{$hpaciente['dni']}} </strong> <br>
-        <strong  > Sexo: {{$hpaciente['sexo']}} </strong>
-        <strong  > Edad : {{$hpaciente['edad']}} años</strong>
-        <strong  > Fecha Nacimiento : {{$hpaciente['fecha_nacimiento']}}</strong> <br>
-        <strong  > Dirección :{{$hpaciente['direccion']}}</strong>
-        <strong  > Celular :{{$hpaciente['celular']}}</strong>
-        <strong  > whatsapp:{{$hpaciente['whatsapp']}}</strong> <br>
-        <strong  > Correo: {{$hpaciente['email']}}</strong>
+        <strong>Nombre del Paciente : {{$hpaciente['nombre']}} {{$hpaciente['apellido']}} </strong> <strong>DNI: {{$hpaciente['dni']}} </strong> <br>
+        <strong> Sexo: {{$hpaciente['sexo']}} </strong>
+        <strong> Edad : {{$hpaciente['edad']}} años</strong>
+        <strong> Fecha Nacimiento : {{date('d/m/Y',strtotime($hpaciente['fecha_nacimiento']))}}</strong> <br>
+        <strong> Dirección :{{$hpaciente['direccion']}}</strong>
+        <strong> Celular :{{$hpaciente['celular']}}</strong>
+        <strong> whatsapp:{{$hpaciente['whatsapp']}}</strong> <br>
+        <strong> Correo: {{$hpaciente['email']}}</strong>
     </div>
     <div class="consulta">
         <u>
             <h4>MOTIVO DE CONSULTA </h4>
-        </u> 
-        <p style="font-family: monospace"> {!! strip_tags(BBCode::convertToHtml($hpaciente['motivoCons']),'<b><i><u>') !!}</p>
+        </u>
+        <p style="font-family:sans-serif;"> {!! strip_tags(BBCode::convertToHtml($hpaciente['motivoCons']),'<b><i><u>') !!}</p>
     </div>
     <div class="consulta">
         <ul style="margin-top: 10px;">
-            <li>GP: {{$hpaciente['GP']}}</li>
-            <li>FUR: {{$hpaciente['FUR']}}</li>
-            <li>PAP: {{$hpaciente['PAP']}}</li>
-            <li>MAC: {{$hpaciente['MAC']}}</li>
-            <li>RAM: {{$hpaciente['RAM']}}</li>
+            <li>  <strong>Gesta Para:</strong> {{$hpaciente['GP']}}</li>
+            <li>  <strong>Fecha Ultima Regla:</strong> {{date('d/m/Y',strtotime($hpaciente['FUR'])) }}</li>
+            <li>  <strong>Papanicolaou:</strong> {{$hpaciente['PAP']}}</li>
+
+        </ul>
+        <ul>
+            <li>  <strong>Metodo Anticonceptivo:</strong> {{$hpaciente['MAC']}}</li>
+            <li>  <strong>Reacción Adversa a Medicamento:</strong> {{$hpaciente['RAM']}}</li>
         </ul>
     </div>
     @if($hpaciente['antecedenteP'])
     <div class="consulta">
         <u>
             <h4>ANTECEDENTES PERSONALES </h4>
-        </u> 
-        <p style="font-family: monospace">{!! strip_tags(BBCode::convertToHtml($hpaciente['antecedenteP']),'<b><i><u>') !!}</p>
+        </u>
+        <p style="font-family: sans-serif;">{!! strip_tags(BBCode::convertToHtml($hpaciente['antecedenteP']),'<b><i><u>') !!}</p>
     </div>
     @endif
     @if($hpaciente['antecedenteF'])
     <div class="consulta">
         <u>
             <h4>ANTECEDENTES FAMILIARES </h4>
-        </u> 
-        <p style="font-family: monospace">{!! strip_tags(BBCode::convertToHtml($hpaciente['antecedenteF']),'<b><i><u>') !!}</p>
+        </u>
+        <p style="font-family: sans-serif;">{!! strip_tags(BBCode::convertToHtml($hpaciente['antecedenteF']),'<b><i><u>') !!}</p>
     </div>
     @endif
     <div class="consulta">
@@ -241,16 +245,19 @@
             <h4>EXAMEN CLINICO</h4>
         </u>
         <ul>
-            <li>PA: {{$hpaciente['pa']}}</li>
-            <li>T: {{$hpaciente['t']}}</li>
-            <li>FC: {{$hpaciente['fc']}}</li>
-            <li>FR: {{$hpaciente['fr']}}</li>
-            <li>PESO: {{$hpaciente['peso']}} kg</li>
-            <li>Talla: {{$hpaciente['talla']}} cm</li>
+            <li><strong>Perimetro Abdominal: </strong>{{ isset( $hpaciente['pa']) ? $hpaciente['pa'] : 'Sin Información' }}</li>
+            <li><strong>Temperatura:</strong><?= isset($hpaciente['t']) ? $hpaciente['t'] : 'Sin Información' ?> </li>
+            <li><strong>Frecuencia Cardiaca:</strong><?= isset($hpaciente['fc']) ? $hpaciente['fc'] : 'Sin Información' ?></li>
+
+        </ul>
+        <ul>
+            <li><strong>Frecuencia Respiratoria:</strong><?= isset($hpaciente['fr']) ? $hpaciente['fr'] : 'Sin Información' ?></li>
+            <li><strong>Peso:</strong><?= isset($hpaciente['peso']) ? $hpaciente['peso'] . 'kg' : 'Sin Información' ?> </li>
+            <li><strong>Talla:</strong><?= isset($hpaciente['talla']) ? $hpaciente['talla'] . 'cm' : 'Sin Información' ?> </li>
         </ul>
         <br>
         @if($hpaciente['Comentclinico']!=null)
-        <P style="font-family: monospace">{!! strip_tags(BBCode::convertToHtml($hpaciente['Comentclinico']),'<b><i><u>') !!}</P>
+        <P style="font-family: sans-serif;">{!! strip_tags(BBCode::convertToHtml($hpaciente['Comentclinico']),'<b><i><u>') !!}</P>
         @endif
     </div>
     @if($hpaciente['diagnostico']!=null)
@@ -272,19 +279,19 @@
     </div>
     @endif
     @if($hpaciente['Tratamiento']!=null)
-    <div class="consulta" >
+    <div class="consulta">
         <u>
             <h4>TRATAMIENTO </h4>
         </u>
         <table class="table table-bordered table-striped table-sm">
-                <tr>
-                    <th style="vertical-align: middle;text-align: center;">INDICACIONES MEDICAS</th>
-                </tr>
+            <tr>
+                <th style="vertical-align: middle;text-align: center;">INDICACIONES MEDICAS</th>
+            </tr>
             <tbody>
                 @foreach($hpaciente['Tratamiento'] as $indicacion)
                 <tr>
                     <td style="vertical-align: middle;text-align: center;">
-                    {!! strip_tags(BBCode::convertToHtml($indicacion['indicaciones']),'<b><i><u>') !!} 
+                        {!! ($indicacion['indicaciones']) !!}
                     </td>
                 </tr>
                 @endforeach
@@ -292,7 +299,7 @@
         </table>
     </div>
     @endif
-    
+
     <!-- @if($hpaciente['DocLaboratorio'])
     <div class="consulta">
         <u>
@@ -305,16 +312,16 @@
     <div class="consulta">
         <u>
             <h4>IMAGENEOLOGIA </h4>
-        </u> 
-        <p style="font-family: monospace">  {!! strip_tags(BBCode::convertToHtml($hpaciente['imageneologia']),'<b><i><u>') !!}</p>
+        </u>
+        <p style="font-family: sans-serif;"> {!! strip_tags(BBCode::convertToHtml($hpaciente['imageneologia']),'<b><i><u>') !!} </p>
     </div>
     @endif
     @if($hpaciente['pcita'])
     <div class="consulta">
         <u>
             <h4>Proxima Cita </h4>
-        </u> 
-        <p style="font-family: sans-serif;padding: 0px;">{{$hpaciente['pcita']}} </p>
+        </u>
+        <p style="font-family: sans-serif;padding: 0px;">{{ date('d/m/Y',strtotime($hpaciente['pcita'])) }} </p>
     </div>
     @endif
 

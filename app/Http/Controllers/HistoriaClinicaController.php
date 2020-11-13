@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\AlmacenarHistoriaClinica;
 use App\DocumentoLaboratorio;
 use App\HistoriaClinica;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -121,7 +122,7 @@ class HistoriaClinicaController extends Controller
             $diagnosticoPaciente = serialize($diagnosticado);
             //Para destraformar el serialize se usa unserialize
             //  $desconvertido=unserialize($diagnostico);
-            $fechaActual=date("Y-m-d");
+            $fechaActual = date("Y-m-d");
             $datos = array(
                 'nCitamed' => $request->NumeroCitaMedica,
                 'user_id' => $request->id_user,
@@ -156,9 +157,9 @@ class HistoriaClinicaController extends Controller
                 'diagnostico' => $diagnosticoPaciente,
                 'DocLaboratorio' => $request->documentoLabotario,
                 'imageneologia' => $request->imageneologia,
-                'pcita' => ($request->proximacita!="null") ? $request->proximacita  : null,
+                'pcita' => ($request->proximacita != "null") ? $request->proximacita  : null,
                 'vigencia_paciente' => 1,
-                "fecha_creacion"=>$fechaActual
+                "fecha_creacion" => $fechaActual
             );
             if ($request->id_paciente != 'null') {
                 $datos += [
@@ -196,8 +197,8 @@ class HistoriaClinicaController extends Controller
                     );
                     DocumentoLaboratorio::create($Documento);
                 }
-             
-          
+
+
 
                 $repuesta = "";
                 if ($paciente) {
@@ -282,10 +283,11 @@ class HistoriaClinicaController extends Controller
             $tratamiento = null;
         }
         $DocHclinica[0]['Tratamiento'] = $tratamiento;
-        $imagen=base64_encode(file_get_contents("https://www.sangeronimohistoriaclinica.com/apiMedico/public/img/sangeronimo.jpg"));
+        $imagen = base64_encode(file_get_contents("https://www.sangeronimohistoriaclinica.com/apiMedico/public/img/sangeronimo.jpg"));
         // dd($imagen);
-        $pdf = \PDF::loadView('pdf.historiaClinica', ['historiaM' => $DocHclinica,"imagen"=>$imagen]);
-        return $pdf->stream();
+        $pdf = \PDF::loadView('pdf.historiaClinica', ['historiaM' => $DocHclinica, "imagen" => $imagen]);
+        // return $pdf->stream();
+        return $pdf->download('Historia del Paciente.pdf');
     }
 
     public function AlmacenarPaciente(Request $request)
@@ -293,7 +295,7 @@ class HistoriaClinicaController extends Controller
         $json = $request->input('json', null);
         $id_paciente = json_decode($json, true);
         $Hclinica = historiaclinica::where('id', $id_paciente)->first()->toArray();
-        $fechaActual=date("Y-m-d");
+        $fechaActual = date("Y-m-d");
         // dd($Hclinica);
         $datos = array(
             'usuario_id' => $Hclinica['user_id'],
@@ -331,7 +333,7 @@ class HistoriaClinicaController extends Controller
             'DocLaboratorio' => $Hclinica['DocLaboratorio'],
             'imageneologia' => $Hclinica['imageneologia'],
             'pcita' => $Hclinica['pcita'],
-            "fecha_creacion"=>$fechaActual
+            "fecha_creacion" => $fechaActual
         );
 
         $paciente = AlmacenarHistoriaClinica::create($datos);
@@ -341,5 +343,116 @@ class HistoriaClinicaController extends Controller
         } else {
             return response()->json('fallo');
         }
+    }
+
+    public function InicioFechaAtendido(Request $repuesta)
+    {
+        $paciente = AlmacenarHistoriaClinica::whereBetWeen("fecha_creacion", [$repuesta->fechaIncio, $repuesta->FechaFin])
+            ->get()
+            ->toArray();
+        $arraymes = array();
+        $Enero = 0;
+        $Febrero = 0;
+        $Marzo = 0;
+        $Abril = 0;
+        $Mayo = 0;
+        $Junio = 0;
+        $Julio = 0;
+        $Agosto = 0;
+        $Septiembre = 0;
+        $Octubre = 0;
+        $Noviembre = 0;
+        $Diciembre = 0;
+        foreach ($paciente as  $elemento) {
+            $meses = array(
+                "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio",
+                "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+            );
+            $fecha = Carbon::parse($elemento['fecha_creacion']);
+            $mes = $meses[($fecha->format('n')) - 1];
+            array_push($arraymes, $mes);
+            switch ($mes) {
+                case 'Enero':
+                    $Enero++;
+                    break;
+                case 'Febrero':
+                    $Febrero++;
+                    break;
+                case 'Marzo':
+                    $Marzo++;
+                    break;
+                case 'Abril':
+                    $Abril++;
+                    break;
+                case 'Mayo':
+                    $Mayo++;
+                    break;
+                case 'Junio':
+                    $Junio++;
+                    break;
+                case 'Julio':
+                    $Julio++;
+                    break;
+                case 'Agosto':
+                    $Agosto++;
+                    break;
+                case 'Septiembre':
+                    $Septiembre++;
+                    break;
+                case 'Octubre':
+                    $Octubre++;
+                    break;
+                case 'Noviembre':
+                    $Noviembre++;
+                    break;
+                case 'Diciembre':
+                    $Diciembre++;
+                    break;
+            }
+        }
+        $cantidadmes = [
+            "Enero" => $Enero,
+            "Febrero" => $Febrero,
+            "Marzo" => $Marzo,
+            "Abril" => $Abril,
+            "Mayo" => $Mayo,
+            "Junio" => $Junio,
+            "Julio" => $Julio,
+            "Agosto" => $Agosto,
+            "Septiembre" => $Septiembre,
+            "Octubre" => $Octubre,
+            "Noviembre" => $Noviembre,
+            "Diciembre" => $Diciembre,
+        ];
+        $mesAsignado = array();
+        foreach ($cantidadmes as $elemento) {
+            if ($elemento != 0) {
+                array_push($mesAsignado, $elemento);
+            }
+        }
+        $mesesAtendido = array_unique($arraymes);
+        $mesEscogido=array();
+        foreach ($mesesAtendido as $elemento) {
+                array_push($mesEscogido, $elemento);
+        }
+        $respuesta=array(
+            "mes"=>$mesEscogido,
+            "cantidadmes"=>$mesAsignado
+        );
+        return response()->json($respuesta);
+    }
+    function group_by($key, $data)
+    {
+        $result = array();
+
+        foreach ($data as $val) {
+            if (array_key_exists($key, $val)) {
+                $result[$val[$key]][] = $val;
+            } else {
+                $result[""][] = $val;
+            }
+        }
+
+        return $result;
     }
 }
