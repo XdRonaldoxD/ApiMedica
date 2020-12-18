@@ -12,10 +12,10 @@ class User extends Authenticatable
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'id','nombre', 'email', 'password','apellido','dni','direccion','celular','role','vigencia_users','session_id'
+        'id','nombre', 'email', 'password','apellido','dni','direccion','celular','role','vigencia_users','session_id','path_user'
     ];
     protected $hidden = [
-        'password', 'remember_token',
+        'password', 'remember_token','dni'
     ];
     public $timestamps = false;
 }

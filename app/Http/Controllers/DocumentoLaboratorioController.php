@@ -9,6 +9,7 @@ use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Genert\BBCode\BBCode;
+use Illuminate\Support\Facades\DB;
 
 class DocumentoLaboratorioController extends Controller
 {
@@ -41,18 +42,51 @@ class DocumentoLaboratorioController extends Controller
     public function TraerPaciente($id)
     {
         $ListaPaciente = HistoriaClinica::where('id', $id)->first();
-        $usuario=User::where('id',$ListaPaciente->user_id)->first()
-        ->toArray();
-        $ListaPaciente->DocLaboratorio=$usuario['nombre'];
+        if (!empty($ListaPaciente)) {
+            $usuario=User::where('id',$ListaPaciente->user_id)->first()
+            ->toArray();
+            $ListaPaciente->DocLaboratorio=$usuario['nombre'];
+        }else{
+            $ListaPaciente="error";
+        }
+
 
         return response()->json($ListaPaciente);
     }
 
-    public function listaDocumentoLabo($id_paciente){
-        $Laboratorio=DocumentoLaboratorio::where('hclinip_id',$id_paciente)
-        ->get()
-        ->toArray();
-        return response()->json($Laboratorio);
+    public function listaDocumentoLabo(Request $request){
+        if($request->length < 1){
+            $longitud=10;
+        }else{
+            $longitud=$request->length;
+        }
+
+        $recordsFilteredTotal=DB::table("doc_historia_clinia_p_s"); 
+        if($request->search['value']!=null){
+            $buscar=$request->search['value'];
+            $recordsFilteredTotal = $recordsFilteredTotal->whereRaw('documento like ? or fecha_documento like ?', ["%$buscar%","%$buscar%"]);
+        }
+        $recordsFilteredTotal = $recordsFilteredTotal->where('hclinip_id',$request->id_paciente);
+        $recordsFilteredTotal = $recordsFilteredTotal->get();
+        $recordsFilteredTotal = $recordsFilteredTotal->toArray();
+        $Laboratorio=DB::table("doc_historia_clinia_p_s");
+        if($request->search['value']!=null){
+            $buscar=$request->search['value'];
+            $Laboratorio = $Laboratorio->whereRaw('documento like ? or fecha_documento like ?', ["%$buscar%","%$buscar%"]);
+        }
+        $Laboratorio = $Laboratorio->where('hclinip_id',$request->id_paciente);
+        $Laboratorio=$Laboratorio->skip($request->start);
+        $Laboratorio=$Laboratorio->take($longitud);
+        $Laboratorio=$Laboratorio->get();
+        $Laboratorio=$Laboratorio->toArray();
+  
+        $datos=array(
+            "draw"=>$request->draw,
+            "recordsTotal"=>count($recordsFilteredTotal),
+            "recordsFiltered"=>count($recordsFilteredTotal),
+            "data"=>$Laboratorio
+        );
+        return response()->json($datos);
     }
     public function InsertarDocumentoLabo(Request $request){
         $fechaActual=date('Y-m-d');
@@ -108,8 +142,8 @@ class DocumentoLaboratorioController extends Controller
 
            
             $pdf = \PDF::loadView('pdf.historiaClinica', ['historiaM' => $DocHclinica,"imagen"=>$imagen]);
-            // return $pdf->stream();
-            return $pdf->download('Historial Clinico del Paciente.pdf');
+            return $pdf->stream();
+            // return $pdf->download('Historial Clinico del Paciente.pdf');
        
     }
 

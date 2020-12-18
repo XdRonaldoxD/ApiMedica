@@ -20,14 +20,14 @@ use Illuminate\Http\Request;
 
 
 
-Route::post('login','UsarioController@login');
+Route::post('login','UsuarioController@login');
 
 
-Route::get('pdf','UsarioController@PruebapDF');
+Route::get('pdf','UsuarioController@PruebapDF');
 
-Route::post('registrado','UsarioController@register');
+Route::post('registrado','UsuarioController@register');
 
-Route::get('consultaDNI','UsarioController@DniGetReniec');
+Route::get('consultaDNI','UsuarioController@DniGetReniec');
 
 Route::name('print')->get('/imprimir', 'GeneradorController@imprimir');
     //Paciente ARCHVIO(IMAGEN Y PDF)
@@ -43,37 +43,51 @@ Route::get('Paciente/Reporte/{id?}','HistoriaClinicaController@MostrarPacientePD
 Route::get('Paciente/Reporte/HistoriaClinica/{id?}','DocumentoLaboratorioController@MostrarTodoPDF');
 Route::get('Paciente/Reporte/Documento/{file_name}','DocumentoLaboratorioController@obtenerPDF');
 
-Route::post('EliminarSession','UsarioController@EliminarSesion');
+Route::post('EliminarSession','UsuarioController@EliminarSesion');
+Route::get('imagenUsuario/{foto}','UsuarioController@getImagenUsuario');
+
+Route::post('usuarios/listado','UsuarioController@ListaUsuario');
+
+
+
 Route::middleware('api.auth', 'throttle:60,1')->group(function () {
 //MEDICOS-USUARIOS
-    // Route::post('login/usuarion/update','UsarioController@updateUser');
-    Route::get('login/usuarion/datouser/{id_usuario}','UsarioController@DatosUsuario');
+    // Route::post('login/usuarion/update','UsuarioController@updateUser');
+    Route::get('login/usuarion/datouser/{id_usuario}','UsuarioController@DatosUsuario');
     //Registrar Doctor(users)
-    Route::post('registrarEditDoctor','UsarioController@registerEditDoctor');
-    Route::post('EmailExistente','UsarioController@EmailExistente');
-    Route::post('DniExistente','UsarioController@DNIExistente');
-    Route::get('usuarios/listado','UsarioController@ListaUsuario');
-    Route::post('Deshabilitar','UsarioController@DeshabilitarUsuario');
-    Route::post('ConsultarUsuario','UsarioController@ConsultaUsuario');
-    Route::get('GetDoctorId/{id}','UsarioController@TraerDatosDoctor');
+    Route::post('registrarEditDoctor','UsuarioController@registerEditDoctor');
+    Route::post('EmailExistente','UsuarioController@EmailExistente');
+    Route::post('DniExistente','UsuarioController@DNIExistente');
+    Route::post('usuarios/listado','UsuarioController@ListaUsuario');
+    Route::post('usuarios/listado/deshablitado','UsuarioController@ListaUsuarioDeshabilitado');
+    Route::post('Deshabilitar','UsuarioController@DeshabilitarUsuario');
+    Route::post('habilitar','UsuarioController@habilitarUsuario');
+    Route::post('ConsultarUsuario','UsuarioController@ConsultaUsuario');
+    Route::get('GetDoctorId/{id}','UsuarioController@TraerDatosDoctor');
+
+    //Perfil Doctor(user)
+    Route::post('UpdatePerfil/Medico','UsuarioController@actualizarUsuario');
  
 
     //Paciente Historia Clinica
-    Route::get('PacienteHistoria/listado','HistoriaClinicaController@ListaHistoriaPaciente');
+    Route::post('PacienteHistoria/listado','HistoriaClinicaController@ListaHistoriaPaciente');
+    Route::post('PacienteHistoria/listado/Deshabilitado','HistoriaClinicaController@ListaHistoriaPacienteDeshabilitado');
     Route::post('DniExistentePaciente','HistoriaClinicaController@DNIExistentePaciente');
     Route::post('InsertarPaciente','HistoriaClinicaController@InsertHistoriaPaciente');
     Route::get('TraerPaciente/{id}','HistoriaClinicaController@TraerHistoriaPaciente');
     Route::post('DeshabilitarPaciente','HistoriaClinicaController@DesactivarPaciente');
+    Route::post('habilitarPaciente','HistoriaClinicaController@ActivarPaciente');
     Route::post('AlmacenarPaciente','HistoriaClinicaController@AlmacenarPaciente');
     Route::post('TratamientoPaciente/Eliminar','IndicacionesDocController@EliminarTratamientoPaciente');
 
     // DOCUMENTO LABORATORIO
-    Route::get('TraerDocumento/{id}','DocumentoLaboratorioController@listaDocumentoLabo');
+    Route::post('TraerDocumento','DocumentoLaboratorioController@listaDocumentoLabo');
     Route::post('Insert/Documentos/Laboratorio','DocumentoLaboratorioController@InsertarDocumentoLabo');
     Route::get('TraerDatoPaciente/{id}','DocumentoLaboratorioController@TraerPaciente');
     Route::post('Borrar/Documentos/Laboratorio','DocumentoLaboratorioController@EliminarArchivoPDF');
 
-
+    //ENVIAR MENSAJE WHASSAP
+    Route::post('Enviar/Mensaje/Whatsapp','EnviarMensajeController@EnviarWhassap');
 
     
     

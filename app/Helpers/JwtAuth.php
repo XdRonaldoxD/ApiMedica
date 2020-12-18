@@ -41,6 +41,7 @@ class JwtAuth
                 'nombre' => $user->nombre,
                 'apellido' => $user->apellido,
                 'tipo_usuario' => $user->role,
+                'imagen'=>$user->path_user,
                 //creacion del dato es el iat create_at
                 'iat' => time(),
                 //despues de una semana
@@ -74,6 +75,7 @@ class JwtAuth
                         'apellido' => $user2->apellido,
                         'tipo_usuario' => $user2->role,
                         'session_id'=>$user2->session_id,
+                        'imagen'=>$user->path_user,
                         //creacion del dato es el iat create_at
                         'iat' => time(),
                         //despues de una semana

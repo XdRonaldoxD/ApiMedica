@@ -8,8 +8,8 @@ use App\HistoriaClinica;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-
-
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class HistoriaClinicaController extends Controller
 {
@@ -76,9 +76,9 @@ class HistoriaClinicaController extends Controller
 
     public function getImagen($filename)
     {
-        $existe = \Storage::disk('historiaclinica')->exists($filename);
+        $existe = Storage::disk('historiaclinica')->exists($filename);
         if ($existe) {
-            $file = \Storage::disk('historiaclinica')->get($filename);
+            $file = Storage::disk('historiaclinica')->get($filename);
             return new Response($file, 200);
         } else {
             $data = array(
@@ -92,13 +92,55 @@ class HistoriaClinicaController extends Controller
     }
 
 
-    public function ListaHistoriaPaciente()
+    public function ListaHistoriaPaciente(Request $request)
     {
+        if($request->length < 1){
+            $longitud=10;
+        }else{
+            $longitud=$request->length;
+        }
+        $buscar=$request->search['value'];
+        $recordsFilteredTotal=DB::select("SELECT * FROM historiaclinica
+        where vigencia_paciente=1
+        and ( nCitamed LIKE '%$buscar%' or dni LIKE '%$buscar%' or nombre LIKE '%$buscar%' or apellido LIKE '%$buscar%'  )");
+        $limit = 'LIMIT ' . $longitud . ' OFFSET ' . $request->start;
+        $DocumentoHistoria=DB::select("SELECT * FROM historiaclinica
+        where vigencia_paciente=1
+        and ( nCitamed LIKE '%$buscar%' or dni LIKE '%$buscar%' or nombre LIKE '%$buscar%' or apellido LIKE '%$buscar%'  )
+        ORDER BY id DESC $limit ");
+        $datos = array(
+            "draw" => $request->draw,
+            "recordsTotal" => count($recordsFilteredTotal),
+            "recordsFiltered" => count($recordsFilteredTotal),
+            "data" => $DocumentoHistoria
+        );
+        return response()->json($datos);
+    }
 
-        $ListaPaciente = HistoriaClinica::where('vigencia_paciente', 1)
-            ->orderBy('id', 'DESC')
-            ->get();
-        return response()->json($ListaPaciente);
+    public function ListaHistoriaPacienteDeshabilitado(Request $request)
+    {
+        if($request->length < 1){
+            $longitud=10;
+        }else{
+            $longitud=$request->length;
+        }
+        $buscar=$request->search['value'];
+        $recordsFilteredTotal=DB::select("SELECT * FROM historiaclinica
+        where vigencia_paciente=0
+        and ( nCitamed LIKE '%$buscar%' or dni LIKE '%$buscar%' or nombre LIKE '%$buscar%' or apellido LIKE '%$buscar%' )");
+        $limit = 'LIMIT ' . $longitud . ' OFFSET ' . $request->start;
+        $DocumentoHistoria=DB::select("SELECT * FROM historiaclinica
+        where vigencia_paciente=0
+        and ( nCitamed LIKE '%$buscar%' or dni LIKE '%$buscar%' or nombre LIKE '%$buscar%' or apellido LIKE '%$buscar%' )
+        ORDER BY id DESC
+        $limit");
+        $datos = array(
+            "draw" => $request->draw,
+            "recordsTotal" => count($recordsFilteredTotal),
+            "recordsFiltered" => count($recordsFilteredTotal),
+            "data" => $DocumentoHistoria
+        );
+        return response()->json($datos);
     }
 
     public function DNIExistentePaciente(Request $request)
@@ -115,7 +157,7 @@ class HistoriaClinicaController extends Controller
 
     public function InsertHistoriaPaciente(Request $request)
     {
-
+        // dd($request->all());
         if (isset($request)) {
             $diagnosticado = explode(',', $request->diagnostico);
             //Usando la funcion serialize genera una representacion almacenable
@@ -155,7 +197,7 @@ class HistoriaClinicaController extends Controller
                 'talla' => $request->Talla,
                 'Comentclinico' => $request->ComentarioExamenClinico,
                 'diagnostico' => $diagnosticoPaciente,
-                'DocLaboratorio' => $request->documentoLabotario,
+                'DocLaboratorio' =>(isset($request->imagen)) ? "Documentos alamcenado"  : null ,
                 'imageneologia' => $request->imageneologia,
                 'pcita' => ($request->proximacita != "null") ? $request->proximacita  : null,
                 'vigencia_paciente' => 1,
@@ -167,46 +209,10 @@ class HistoriaClinicaController extends Controller
                 ];
                 //   $usuarios = Staff::find($formulario->id_staff)->update($formularioStaff);
                 $paciente = HistoriaClinica::find($datos['id'])->update($datos);
-                if (!empty($request->documentoLabotario)) {
-                    $fechaActual = date('Y-m-d');
-                    $Documento = array(
-                        'usuario_id' => $request->id_user,
-                        'hclinip_id' => $request->id_paciente,
-                        'documento' => $request->documentoLabotario,
-                        'fecha_documento' => $fechaActual
-                    );
-                    DocumentoLaboratorio::create($Documento);
-                }
-                $repuesta = "";
-                if ($paciente) {
-                    $repuesta = "ok";
-                } else {
-                    $repuesta = "fallo";
-                }
-                return response()->json($repuesta);
+                $id_paciente=$datos['id'];
             } else {
                 $paciente = HistoriaClinica::create($datos);
-                $DocumentoPaciente = HistoriaClinica::latest('id')->first();
-                if (!empty($DocumentoPaciente->DocLaboratorio)) {
-                    $fechaActual = date('Y-m-d');
-                    $Documento = array(
-                        'usuario_id' => $request->id_user,
-                        'hclinip_id' => $DocumentoPaciente->id,
-                        'documento' => $DocumentoPaciente->DocLaboratorio,
-                        'fecha_documento' => $fechaActual
-                    );
-                    DocumentoLaboratorio::create($Documento);
-                }
-
-
-
-                $repuesta = "";
-                if ($paciente) {
-                    $repuesta = "ok";
-                } else {
-                    $repuesta = "fallo";
-                }
-                return response()->json($repuesta);
+                $id_paciente=$paciente->id;
             }
         } else {
             $fallo = array(
@@ -216,6 +222,31 @@ class HistoriaClinicaController extends Controller
             );
             return $fallo;
         }
+
+        if (isset($request->imagen)) {
+            $fechaActual = date('Y-m-d');
+            foreach ($request->imagen as $imagen) {
+                $nombreArchivo = $imagen->getClientOriginalName();
+                // $nombreArchivo= pathinfo($nombreArchivo, PATHINFO_FILENAME);
+                // $path =$nombreArchivo.time().'.'. $imagen->getClientOriginalExtension();
+                $imagen->move(storage_path('app/DocumentoLaboratorio'), $nombreArchivo);
+                $Documento = array(
+                    'usuario_id' => $request->id_user,
+                    'hclinip_id' =>$id_paciente,
+                    'documento' => $nombreArchivo,
+                    'fecha_documento' => $fechaActual
+                );
+                DocumentoLaboratorio::create($Documento);
+            }
+        }
+
+        $repuesta = "";
+        if ($paciente) {
+            $repuesta = "ok";
+        } else {
+            $repuesta = "fallo";
+        }
+        return response()->json($repuesta);
     }
     public function DesactivarPaciente(Request $request)
     {
@@ -224,6 +255,17 @@ class HistoriaClinicaController extends Controller
         $request = json_decode($json, true);
         $ListaPaciente = HistoriaClinica::where('id', $request)->first();
         $ListaPaciente->vigencia_paciente = 0;
+        $ListaPaciente->save();
+        return response()->json('ok');
+    }
+
+    public function ActivarPaciente(Request $request)
+    {
+
+        $json = $request->input('json', null);
+        $request = json_decode($json, true);
+        $ListaPaciente = HistoriaClinica::where('id', $request)->first();
+        $ListaPaciente->vigencia_paciente = 1;
         $ListaPaciente->save();
         return response()->json('ok');
     }
@@ -431,13 +473,13 @@ class HistoriaClinicaController extends Controller
             }
         }
         $mesesAtendido = array_unique($arraymes);
-        $mesEscogido=array();
+        $mesEscogido = array();
         foreach ($mesesAtendido as $elemento) {
-                array_push($mesEscogido, $elemento);
+            array_push($mesEscogido, $elemento);
         }
-        $respuesta=array(
-            "mes"=>$mesEscogido,
-            "cantidadmes"=>$mesAsignado
+        $respuesta = array(
+            "mes" => $mesEscogido,
+            "cantidadmes" => $mesAsignado
         );
         return response()->json($respuesta);
     }
